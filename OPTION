@@ -1,0 +1,50 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import pandas as pd
+from pandas_datareader import data as pdr
+from datetime import datetime, date
+import scipy.stats as stats
+from scipy.stats import norm
+
+
+# Variables
+r = 0.01   # risk-free rate
+S = 30    # current stock price
+K = 40     # strike price
+T = 250 / 365  # time to maturity in years
+sigma = 0.26   # volatility
+N = 10 # n of time steps
+M = 10000 # n of sim
+
+
+marketval = 3.86
+TT = ((date(2024, 7, 17) - datetime.today().date()).days + 1) / 365
+print("Time in years", TT)
+
+
+
+def black_scholes(r, S, K, T, sigma, option_type="Call"):
+    try:
+        d1 = (np.log(S / K) + (r + (sigma ** 2) / 2) * T) / (sigma * np.sqrt(T))
+        d2 = d1 - sigma * np.sqrt(T)
+
+        if option_type == "Call":
+            price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+        elif option_type == "Put":
+            price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+        else:
+            raise ValueError("option_type must be either 'Call' or 'Put'")
+
+        return price
+
+    except Exception as e:
+        print("Error computing option price:", e)
+
+# Example usage:
+call_price = black_scholes(r, S, K, T, sigma, option_type="Call")
+put_price = black_scholes(r, S, K, T, sigma, option_type="Put")
+
+print("Call Option Price:", call_price)
+print("Put Option Price:", put_price)  
+
